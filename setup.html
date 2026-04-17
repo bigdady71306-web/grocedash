@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GroceDash — Database Setup</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f0f; color: #eee; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 28px; max-width: 560px; width: 100%; }
+  h1 { color: #ff6b35; font-size: 1.4em; margin-bottom: 8px; }
+  p { color: #aaa; font-size: 0.9em; line-height: 1.6; margin-bottom: 16px; }
+  pre { background: #0f0f0f; border: 1px solid #333; border-radius: 8px; padding: 16px; font-size: 0.75em; overflow-x: auto; color: #a78bfa; line-height: 1.5; white-space: pre-wrap; margin-bottom: 16px; max-height: 300px; overflow-y: auto; }
+  .btn { background: #ff6b35; color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-weight: 700; cursor: pointer; font-size: 0.95em; width: 100%; margin-bottom: 10px; }
+  .btn:hover { background: #e55a25; }
+  .btn-ghost { background: #222; color: #eee; }
+  .btn-ghost:hover { background: #333; }
+  .step { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .step-num { background: #ff6b35; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step-text { font-size: 0.85em; color: #ccc; line-height: 1.5; }
+  .step-text a { color: #ff6b35; }
+  .status { padding: 10px 14px; border-radius: 8px; font-size: 0.85em; margin-bottom: 12px; display: none; }
+  .status.success { background: #0f3a1a; border: 1px solid #166534; color: #86efac; }
+  .status.error { background: #3a1515; border: 1px solid #7f1d1d; color: #fca5a5; }
+  .copy-btn { background: #333; border: none; color: #aaa; border-radius: 4px; padding: 4px 8px; font-size: 0.7em; cursor: pointer; float: right; margin-bottom: 4px; }
+  .copy-btn:hover { color: #fff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🛠️ Database Setup Required</h1>
+  <p>GroceDash needs a few tables in your Supabase project. Follow these quick steps to enable cloud sync:</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text">Go to your <a href="https://supabase.com/dashboard/project/tycvgbglbcdhderbhfdt/sql/new" target="_blank">Supabase SQL Editor →</a></div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text">Copy and paste the SQL below into the editor</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text">Click <strong>Run</strong>, then come back and click "Check Setup" below</div>
+  </div>
+
+  <button class="copy-btn" onclick="copySQL()">📋 Copy SQL</button>
+  <pre id="sqlBlock">-- GroceDash Setup SQL
+-- Paste this in Supabase Dashboard → SQL Editor → Run
+
+create table if not exists families (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade unique,
+  name text default 'My Family',
+  member_count int default 5,
+  dietary_notes text,
+  weekly_budget numeric default 250,
+  store text default 'HEB — N. Frazier, Conroe TX',
+  created_at timestamptz default now()
+);
+alter table families enable row level security;
+create policy "Users own family" on families for all using (auth.uid() = user_id);
+
+create table if not exists meal_plans (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  week_start date not null,
+  sunday_recipe_id text, monday_recipe_id text,
+  tuesday_recipe_id text, wednesday_recipe_id text,
+  thursday_recipe_id text, friday_recipe_id text,
+  saturday_recipe_id text,
+  created_at timestamptz default now(),
+  unique(user_id, week_start)
+);
+alter table meal_plans enable row level security;
+create policy "Users own meal_plans" on meal_plans for all using (auth.uid() = user_id);
+
+create table if not exists grocery_lists (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  week_start date not null,
+  budget numeric default 250,
+  items jsonb default '[]',
+  created_at timestamptz default now(),
+  unique(user_id, week_start)
+);
+alter table grocery_lists enable row level security;
+create policy "Users own grocery_lists" on grocery_lists for all using (auth.uid() = user_id);
+
+create table if not exists trip_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  trip_date date not null,
+  store_name text,
+  budget numeric,
+  amount_spent numeric,
+  item_count int default 0,
+  saved numeric,
+  created_at timestamptz default now()
+);
+alter table trip_history enable row level security;
+create policy "Users own trip_history" on trip_history for all using (auth.uid() = user_id);</pre>
+
+  <div id="statusEl" class="status"></div>
+  <button class="btn" onclick="checkSetup()">✅ Check Setup</button>
+  <button class="btn btn-ghost" onclick="window.location.href='app.html'">← Back to App (works without DB)</button>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://tycvgbglbcdhderbhfdt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CRayW1VzgA_s1T5qMrggkg_kyN3SFuh';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function copySQL() {
+  navigator.clipboard.writeText(document.getElementById('sqlBlock').textContent);
+  document.querySelector('.copy-btn').textContent = '✓ Copied!';
+  setTimeout(() => { document.querySelector('.copy-btn').textContent = '📋 Copy SQL'; }, 2000);
+}
+
+async function checkSetup() {
+  const el = document.getElementById('statusEl');
+  el.style.display = 'block';
+  el.className = 'status';
+  el.textContent = 'Checking...';
+
+  const { data, error } = await sb.from('families').select('id').limit(1);
+  if (error) {
+    el.className = 'status error';
+    el.textContent = '❌ Tables not found yet. Run the SQL in Supabase first, then try again.';
+  } else {
+    el.className = 'status success';
+    el.textContent = '✅ Database is ready! Redirecting to app...';
+    setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+  }
+}
+</script>
+</body>
+</html>
