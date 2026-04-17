@@ -278,8 +278,15 @@ async function doSignup() {
   } else {
     // Store family name for profile setup
     sessionStorage.setItem('new_family_name', name);
-    showSuccess('Account created! Redirecting...');
-    setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+    // Check if email confirmation is needed
+    if (data?.user?.confirmation_sent_at && !data?.session) {
+      showSuccess('✅ Account created! Check your email and click the confirmation link, then sign in.');
+      btn.innerHTML = 'Create Account →';
+      btn.disabled = false;
+    } else {
+      showSuccess('Account created! Redirecting...');
+      setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+    }
   }
 }
 
