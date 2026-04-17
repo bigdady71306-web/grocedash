@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GroceDash — Family Meal & Grocery Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f0f;
+    color: #eee;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .logo-icon {
+    font-size: 3.5em;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .logo h1 {
+    font-size: 2.2em;
+    font-weight: 900;
+    color: #ff6b35;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .logo p {
+    color: #888;
+    font-size: 0.9em;
+    margin-top: 4px;
+  }
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .tab-switcher {
+    display: flex;
+    background: #111;
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #888;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: #ff6b35;
+    color: #fff;
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    color: #aaa;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .form-group input {
+    width: 100%;
+    background: #0f0f0f;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    padding: 12px 14px;
+    font-size: 1em;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: #ff6b35;
+  }
+  .btn-primary {
+    width: 100%;
+    background: #ff6b35;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .btn-primary:hover { background: #e55a25; }
+  .btn-primary:disabled { background: #555; cursor: not-allowed; }
+  .error-msg {
+    background: #3a1515;
+    border: 1px solid #7f1d1d;
+    border-radius: 8px;
+    color: #fca5a5;
+    padding: 10px 14px;
+    font-size: 0.85em;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .success-msg {
+    background: #0f3a1a;
+    border: 1px solid #166534;
+    border-radius: 8px;
+    color: #86efac;
+    padding: 10px 14px;
+    font-size: 0.85em;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .divider {
+    height: 1px;
+    background: #2a2a2a;
+    margin: 24px 0;
+  }
+  .footer-text {
+    text-align: center;
+    color: #555;
+    font-size: 0.75em;
+    margin-top: 20px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff3;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="logo">
+  <span class="logo-icon">🛒</span>
+  <h1>GroceDash</h1>
+  <p>Family Meal Planning & Grocery Tracker</p>
+</div>
+
+<div class="card">
+  <div class="tab-switcher">
+    <button class="tab-btn active" id="loginTabBtn" onclick="showTab('login')">Sign In</button>
+    <button class="tab-btn" id="signupTabBtn" onclick="showTab('signup')">Create Account</button>
+  </div>
+
+  <div id="errorMsg" class="error-msg"></div>
+  <div id="successMsg" class="success-msg"></div>
+
+  <!-- Login Form -->
+  <div id="loginForm">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In →</button>
+  </div>
+
+  <!-- Signup Form -->
+  <div id="signupForm" style="display:none;">
+    <div class="form-group">
+      <label>Family Name</label>
+      <input type="text" id="signupName" placeholder="The Higginbothams">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="signupEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="signupPassword" placeholder="Min 6 characters" autocomplete="new-password">
+    </div>
+    <button class="btn-primary" id="signupBtn" onclick="doSignup()">Create Account →</button>
+  </div>
+</div>
+
+<div class="footer-text">Higginbotham Family Edition · HEB Conroe, TX</div>
+
+<script>
+const SUPABASE_URL = 'https://tycvgbglbcdhderbhfdt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CRayW1VzgA_s1T5qMrggkg_kyN3SFuh';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Check if already logged in
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    window.location.href = 'app.html';
+  }
+})();
+
+function showTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('loginTabBtn').className = 'tab-btn' + (tab === 'login' ? ' active' : '');
+  document.getElementById('signupTabBtn').className = 'tab-btn' + (tab === 'signup' ? ' active' : '');
+  clearMsgs();
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+}
+function showSuccess(msg) {
+  const el = document.getElementById('successMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('errorMsg').style.display = 'none';
+}
+function clearMsgs() {
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showError('Please fill in all fields.'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.innerHTML = '<span class="spinner"></span>Signing in...';
+  btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    showError(error.message);
+    btn.innerHTML = 'Sign In →';
+    btn.disabled = false;
+  } else {
+    window.location.href = 'app.html';
+  }
+}
+
+async function doSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  if (!name || !email || !password) { showError('Please fill in all fields.'); return; }
+  if (password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+  const btn = document.getElementById('signupBtn');
+  btn.innerHTML = '<span class="spinner"></span>Creating account...';
+  btn.disabled = true;
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { family_name: name } } });
+  if (error) {
+    showError(error.message);
+    btn.innerHTML = 'Create Account →';
+    btn.disabled = false;
+  } else {
+    // Store family name for profile setup
+    sessionStorage.setItem('new_family_name', name);
+    showSuccess('Account created! Redirecting...');
+    setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+  }
+}
+
+// Enter key support
+document.addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    const loginVisible = document.getElementById('loginForm').style.display !== 'none';
+    if (loginVisible) doLogin(); else doSignup();
+  }
+});
+</script>
+</body>
+</html>
