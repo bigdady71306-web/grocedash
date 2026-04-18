@@ -518,6 +518,7 @@ body {
     <!-- Recipe Library -->
     <div class="card">
       <div class="card-title">📖 Recipe Library</div>
+      <div id="recipeFilters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
       <div id="recipeLibrary"></div>
     </div>
   </div>
@@ -860,6 +861,480 @@ const DEFAULT_RECIPES = [
       'Eat straight from the pan — it\'s nacho night!',
     ]
   },
+  {
+    id: 'r7',
+    name: 'Homemade Pizza Night',
+    emoji: '🍕',
+    cook_time: '45 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Pizza dough (store-bought)', qty: 2, unit: 'balls', category: 'cat-bread', price: 3.99 },
+      { name: 'Pizza sauce', qty: 1, unit: 'jar', category: 'cat-dry', price: 2.49 },
+      { name: 'Mozzarella shredded', qty: 2, unit: 'cups', category: 'cat-dairy', price: 3.98 },
+      { name: 'Pepperoni', qty: 1, unit: '6oz pkg', category: 'cat-meat', price: 3.49 },
+      { name: 'Olive oil', qty: 1, unit: 'bottle', category: 'cat-dry', price: 4.49 },
+    ],
+    steps: [
+      'Preheat oven to 450°F.',
+      'Roll out pizza dough on a lightly floured surface.',
+      'Brush dough lightly with olive oil.',
+      'Spread pizza sauce evenly, leaving a 1-inch border.',
+      'Add shredded mozzarella and pepperoni.',
+      'Bake 12–15 minutes until crust is golden and cheese is bubbly.',
+    ]
+  },
+  {
+    id: 'r8',
+    name: 'Beef & Cheese Quesadillas',
+    emoji: '🫓',
+    cook_time: '20 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Large flour tortillas', qty: 10, unit: 'ct', category: 'cat-bread', price: 3.48 },
+      { name: 'Colby Jack shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 4.98 },
+      { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
+      { name: 'Salsa 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
+      { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
+    ],
+    steps: [
+      'Brown ground beef with taco seasoning per packet instructions. Drain fat.',
+      'Heat a large skillet over medium heat.',
+      'Place one tortilla in skillet. Add beef and cheese to one half.',
+      'Fold tortilla over filling and cook 2 minutes per side until golden and crispy.',
+      'Slice into wedges. Serve with sour cream and salsa.',
+    ]
+  },
+  {
+    id: 'r9',
+    name: 'Chicken Fried Rice',
+    emoji: '🍳',
+    cook_time: '25 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken breast', qty: 2, unit: 'lbs', category: 'cat-meat', price: 9.38 },
+      { name: 'White rice (cooked ahead)', qty: 4, unit: 'cups', category: 'cat-dry', price: 2.99 },
+      { name: 'Eggs', qty: 4, unit: 'ea', category: 'cat-dairy', price: 1.96 },
+      { name: 'Soy sauce', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.48 },
+      { name: 'Butter sticks 4-pack', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 3.78 },
+      { name: 'Garlic bulb', qty: 1, unit: 'head', category: 'cat-produce', price: 0.78 },
+    ],
+    steps: [
+      'Cook rice ahead of time and let cool (day-old rice works best).',
+      'Dice chicken into small cubes. Season with salt and pepper.',
+      'Cook chicken in butter in a large wok or skillet over high heat. Remove and set aside.',
+      'Push everything to the side, crack eggs in the center and scramble.',
+      'Add rice, soy sauce, minced garlic, and butter. Stir fry 5 minutes on high heat.',
+      'Add chicken back in. Toss everything together and serve hot.',
+    ]
+  },
+  {
+    id: 'r10',
+    name: 'Homemade Cheeseburgers',
+    emoji: '🍔',
+    cook_time: '30 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2.5, unit: 'lbs', category: 'cat-meat', price: 14.95 },
+      { name: 'American cheese slices 16 oz', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 4.99 },
+      { name: 'Brioche burger buns', qty: 5, unit: 'ct', category: 'cat-bread', price: 5.49 },
+      { name: 'Iceberg lettuce head', qty: 1, unit: 'head', category: 'cat-produce', price: 2.49 },
+      { name: 'Tomato', qty: 2, unit: 'ea', category: 'cat-produce', price: 1.98 },
+      { name: 'Ketchup', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.98 },
+      { name: 'Yellow mustard', qty: 1, unit: 'bottle', category: 'cat-dry', price: 1.48 },
+      { name: 'Pickles dill slices 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.29 },
+    ],
+    steps: [
+      'Divide ground beef into 5 equal patties (about 1/2 lb each).',
+      'Season generously with salt and pepper on both sides.',
+      'Heat grill or cast iron skillet to high heat.',
+      'Cook patties 4 minutes per side for medium doneness.',
+      'Add cheese slice in the last minute of cooking. Cover to melt.',
+      'Toast brioche buns in butter until golden.',
+      'Build burgers with lettuce, tomato, ketchup, mustard, and pickles.',
+    ]
+  },
+  {
+    id: 'r11',
+    name: 'Chicken Tenders & Fries',
+    emoji: '🍗',
+    cook_time: '35 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken breast', qty: 2.5, unit: 'lbs', category: 'cat-meat', price: 11.73 },
+      { name: 'All-purpose flour', qty: 1, unit: 'cup', category: 'cat-dry', price: 0.99 },
+      { name: 'Eggs', qty: 3, unit: 'ea', category: 'cat-dairy', price: 1.47 },
+      { name: 'Breadcrumbs Italian 15 oz', qty: 1, unit: 'canister', category: 'cat-dry', price: 2.48 },
+      { name: 'Frozen french fries 5 lb bag', qty: 1, unit: 'bag', category: 'cat-dry', price: 6.98 },
+      { name: 'Seasoning salt', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.98 },
+    ],
+    steps: [
+      'Cut chicken breasts into strips. Season with seasoning salt.',
+      'Set up breading station: flour, beaten eggs, breadcrumbs in 3 separate bowls.',
+      'Dredge each strip in flour, then egg, then breadcrumbs.',
+      'Fry at 350°F for 6–8 minutes OR bake at 400°F for 20 minutes, flipping halfway.',
+      'Cook frozen fries per package directions.',
+      'Serve with your favorite dipping sauces — ketchup, ranch, honey mustard.',
+    ]
+  },
+  {
+    id: 'r12',
+    name: 'Sloppy Joes',
+    emoji: '🥪',
+    cook_time: '20 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Manwich sauce', qty: 2, unit: 'cans', category: 'cat-dry', price: 3.98 },
+      { name: 'Hamburger buns', qty: 5, unit: 'ct', category: 'cat-bread', price: 2.98 },
+      { name: 'Colby Jack shredded 2 cups', qty: 1, unit: 'bag', category: 'cat-dairy', price: 3.98 },
+    ],
+    steps: [
+      'Brown ground beef in a large skillet over medium-high heat. Break up as it cooks.',
+      'Drain excess fat.',
+      'Add both cans of Manwich sauce. Stir to combine.',
+      'Simmer on medium-low for 10 minutes until thickened.',
+      'Serve on hamburger buns. Top with shredded cheese if desired.',
+    ]
+  },
+  {
+    id: 'r13',
+    name: 'Mac & Cheese with Ground Beef',
+    emoji: '🧀',
+    cook_time: '25 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Elbow pasta 1 lb', qty: 1, unit: 'pkg', category: 'cat-bread', price: 1.48 },
+      { name: 'Ground beef 80/20', qty: 1.5, unit: 'lbs', category: 'cat-meat', price: 8.97 },
+      { name: 'Velveeta 16 oz', qty: 1, unit: 'block', category: 'cat-dairy', price: 5.98 },
+      { name: 'Gallon whole milk', qty: 1, unit: 'gal', category: 'cat-dairy', price: 3.66 },
+      { name: 'Butter sticks 4-pack', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 3.78 },
+      { name: 'Taco seasoning packet', qty: 1, unit: 'pkt', category: 'cat-dry', price: 0.98 },
+    ],
+    steps: [
+      'Cook elbow pasta per package directions. Drain and set aside.',
+      'Brown ground beef in a skillet. Drain fat. Optional: add taco seasoning.',
+      'In a saucepan, melt Velveeta with 1/2 cup milk and 2 tbsp butter over low heat, stirring until smooth.',
+      'Mix cooked pasta with cheese sauce.',
+      'Add seasoned ground beef on top or stir in. Serve hot.',
+    ]
+  },
+  {
+    id: 'r14',
+    name: 'Biscuits & Gravy',
+    emoji: '🍳',
+    cook_time: '30 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Breakfast sausage roll 1 lb', qty: 1.5, unit: 'lbs', category: 'cat-meat', price: 6.99 },
+      { name: 'All-purpose flour', qty: 1, unit: 'cup', category: 'cat-dry', price: 0.99 },
+      { name: 'Gallon whole milk', qty: 1, unit: 'gal', category: 'cat-dairy', price: 3.66 },
+      { name: 'Canned biscuits (8-ct)', qty: 2, unit: 'cans', category: 'cat-bread', price: 5.98 },
+      { name: 'Black pepper', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+    ],
+    steps: [
+      'Cook sausage in a large skillet over medium heat, crumbling as it cooks.',
+      'Do NOT drain — leave all the drippings in the pan.',
+      'Sprinkle 1/3 cup flour over sausage. Stir and cook 1 minute.',
+      'Slowly pour in 3 cups milk, stirring constantly.',
+      'Cook until gravy thickens, about 5–7 minutes. Season with black pepper and salt.',
+      'Meanwhile, bake biscuits per can instructions.',
+      'Split biscuits open and ladle gravy generously over the top.',
+    ]
+  },
+  {
+    id: 'r15',
+    name: 'BBQ Chicken Drumsticks',
+    emoji: '🍖',
+    cook_time: '50 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken drumsticks', qty: 10, unit: 'pieces', category: 'cat-meat', price: 7.98 },
+      { name: 'BBQ sauce 18 oz', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.99 },
+      { name: 'Garlic powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Onion powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Olive oil', qty: 1, unit: 'bottle', category: 'cat-dry', price: 4.49 },
+    ],
+    steps: [
+      'Preheat oven to 400°F.',
+      'Pat drumsticks dry. Coat with olive oil.',
+      'Season with garlic powder, onion powder, salt, and pepper.',
+      'Bake on a foil-lined sheet pan for 35 minutes.',
+      'Remove from oven. Brush generously with BBQ sauce.',
+      'Return to oven and bake 10 more minutes.',
+      'Broil on high for 3 minutes for caramelized, sticky finish.',
+    ]
+  },
+  {
+    id: 'r16',
+    name: 'Sheet Pan Chicken & Potatoes',
+    emoji: '🥔',
+    cook_time: '45 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken breast', qty: 2.5, unit: 'lbs', category: 'cat-meat', price: 11.73 },
+      { name: 'Russet potatoes 5 lb bag', qty: 1, unit: 'bag', category: 'cat-produce', price: 3.48 },
+      { name: 'Olive oil', qty: 1, unit: 'bottle', category: 'cat-dry', price: 4.49 },
+      { name: 'Garlic powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Paprika', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Italian seasoning', qty: 1, unit: 'jar', category: 'cat-dry', price: 2.28 },
+    ],
+    steps: [
+      'Preheat oven to 425°F.',
+      'Dice potatoes into 1-inch cubes. Toss with olive oil, garlic powder, paprika, Italian seasoning, salt, and pepper.',
+      'Spread potatoes evenly on a large sheet pan.',
+      'Season chicken breasts the same way. Place on top of potatoes.',
+      'Roast 35–40 minutes until chicken reaches 165°F internal temp and potatoes are golden.',
+    ]
+  },
+  {
+    id: 'r17',
+    name: 'Beef Enchiladas',
+    emoji: '🌯',
+    cook_time: '45 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Flour tortillas large 10-ct', qty: 1, unit: 'pack', category: 'cat-bread', price: 2.79 },
+      { name: 'Enchilada sauce', qty: 2, unit: 'cans', category: 'cat-dry', price: 3.58 },
+      { name: 'Colby Jack shredded 2 cups', qty: 2, unit: 'bags', category: 'cat-dairy', price: 7.96 },
+      { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
+      { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
+    ],
+    steps: [
+      'Preheat oven to 375°F.',
+      'Brown ground beef with taco seasoning. Drain fat.',
+      'Fill each tortilla with beef and cheese. Roll up and place seam-down in a greased baking dish.',
+      'Pour enchilada sauce over all the rolled tortillas.',
+      'Top with remaining shredded cheese.',
+      'Bake 25 minutes until cheese is melted and bubbly. Serve with sour cream.',
+    ]
+  },
+  {
+    id: 'r18',
+    name: 'Homemade Chili',
+    emoji: '🍲',
+    cook_time: '60 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Kidney beans', qty: 2, unit: 'cans', category: 'cat-dry', price: 2.58 },
+      { name: 'Diced tomatoes 14.5 oz', qty: 2, unit: 'cans', category: 'cat-dry', price: 2.58 },
+      { name: 'Chili seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
+      { name: 'Beef broth 32 oz', qty: 1, unit: 'carton', category: 'cat-dry', price: 2.98 },
+      { name: 'Cornbread mix', qty: 2, unit: 'boxes', category: 'cat-dry', price: 2.96 },
+    ],
+    steps: [
+      'Brown ground beef in a large pot. Drain fat.',
+      'Add kidney beans, diced tomatoes, beef broth, and chili seasoning. Stir well.',
+      'Bring to a boil, then reduce heat and simmer 45 minutes, stirring occasionally.',
+      'Make cornbread per box instructions while chili simmers.',
+      'Serve chili over or beside warm cornbread.',
+    ]
+  },
+  {
+    id: 'r19',
+    name: 'Chicken Caesar Wraps',
+    emoji: '🌯',
+    cook_time: '20 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken breast', qty: 2, unit: 'lbs', category: 'cat-meat', price: 9.38 },
+      { name: 'Large flour tortillas', qty: 5, unit: 'ct', category: 'cat-bread', price: 1.74 },
+      { name: 'Romaine lettuce hearts', qty: 1, unit: 'bag', category: 'cat-produce', price: 3.48 },
+      { name: 'Caesar dressing', qty: 1, unit: 'bottle', category: 'cat-dry', price: 3.48 },
+      { name: 'Parmesan cheese shredded 5 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 3.59 },
+    ],
+    steps: [
+      'Season chicken with salt, pepper, and garlic powder. Cook in a skillet until done (165°F internal).',
+      'Let rest 5 minutes, then slice thin.',
+      'Warm tortillas briefly in a dry pan.',
+      'Toss chopped romaine with Caesar dressing.',
+      'Layer chicken and dressed lettuce into each tortilla. Top with Parmesan.',
+      'Roll tightly, slice in half, and serve.',
+    ]
+  },
+  {
+    id: 'r20',
+    name: 'Steak Night',
+    emoji: '🥩',
+    cook_time: '25 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ribeye or NY strip steaks', qty: 5, unit: 'steaks', category: 'cat-meat', price: 49.95 },
+      { name: 'Butter sticks 4-pack', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 3.78 },
+      { name: 'Garlic bulb', qty: 1, unit: 'head', category: 'cat-produce', price: 0.78 },
+      { name: 'Fresh rosemary', qty: 1, unit: 'bunch', category: 'cat-produce', price: 1.98 },
+      { name: 'Russet potatoes 5 lb bag', qty: 1, unit: 'bag', category: 'cat-produce', price: 3.48 },
+    ],
+    steps: [
+      'Take steaks out of fridge 30 minutes before cooking.',
+      'Season generously with salt and black pepper on both sides.',
+      'Start mashed potatoes: boil cubed potatoes 15 min, drain, mash with butter and milk.',
+      'Heat a cast iron skillet to screaming hot.',
+      'Cook steaks 3–4 minutes per side for medium-rare.',
+      'Add 2 tbsp butter, crushed garlic cloves, and rosemary to the pan. Baste steaks continuously 1 min.',
+      'Rest steaks 5 minutes before serving alongside mashed potatoes.',
+    ]
+  },
+  {
+    id: 'r21',
+    name: 'Beef Pot Roast',
+    emoji: '🍖',
+    cook_time: '360 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chuck roast 3 lbs', qty: 1, unit: 'roast', category: 'cat-meat', price: 17.97 },
+      { name: 'Russet potatoes 5 lb bag', qty: 1, unit: 'bag', category: 'cat-produce', price: 3.48 },
+      { name: 'Carrots 1 lb bag', qty: 1, unit: 'bag', category: 'cat-produce', price: 1.48 },
+      { name: 'Beef broth 32 oz', qty: 1, unit: 'carton', category: 'cat-dry', price: 2.98 },
+      { name: 'Lipton onion soup mix', qty: 1, unit: 'box', category: 'cat-dry', price: 2.48 },
+      { name: 'Garlic bulb', qty: 1, unit: 'head', category: 'cat-produce', price: 0.78 },
+    ],
+    steps: [
+      'Season chuck roast generously with salt and pepper.',
+      'Sear roast in a hot skillet with oil — 3 minutes per side until browned.',
+      'Transfer to slow cooker. Add beef broth, onion soup mix, and minced garlic.',
+      'Add quartered potatoes and carrot chunks around the roast.',
+      'Cook on LOW 8 hours or HIGH 4–5 hours until meat is fall-apart tender.',
+      'Serve with the cooking juices as a natural gravy.',
+    ]
+  },
+  {
+    id: 'r22',
+    name: 'Pulled Pork Sandwiches',
+    emoji: '🥪',
+    cook_time: '480 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Pork shoulder 4 lbs', qty: 1, unit: 'roast', category: 'cat-meat', price: 15.96 },
+      { name: 'BBQ sauce 18 oz', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.99 },
+      { name: 'Apple cider vinegar', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.48 },
+      { name: 'Brown sugar', qty: 1, unit: 'bag', category: 'cat-dry', price: 2.48 },
+      { name: 'Garlic powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Brioche burger buns 4-pk', qty: 2, unit: 'packs', category: 'cat-bread', price: 7.96 },
+    ],
+    steps: [
+      'Rub pork shoulder with garlic powder, salt, and pepper on all sides.',
+      'Place in slow cooker. Add 1/4 cup apple cider vinegar and 2 tbsp brown sugar.',
+      'Cook on LOW 8–10 hours until meat shreds easily with forks.',
+      'Shred pork directly in the slow cooker.',
+      'Mix in BBQ sauce to taste.',
+      'Serve piled high on toasted brioche buns.',
+    ]
+  },
+  {
+    id: 'r23',
+    name: 'Homemade Meatball Subs',
+    emoji: '🥖',
+    cook_time: '45 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Breadcrumbs Italian 15 oz', qty: 1, unit: 'canister', category: 'cat-dry', price: 2.48 },
+      { name: 'Eggs', qty: 2, unit: 'ea', category: 'cat-dairy', price: 0.98 },
+      { name: 'Italian seasoning', qty: 1, unit: 'jar', category: 'cat-dry', price: 2.28 },
+      { name: 'Marinara sauce 24 oz', qty: 2, unit: 'jars', category: 'cat-dry', price: 7.96 },
+      { name: 'Hoagie rolls', qty: 5, unit: 'ct', category: 'cat-bread', price: 4.98 },
+      { name: 'Mozzarella shredded', qty: 2, unit: 'cups', category: 'cat-dairy', price: 3.98 },
+    ],
+    steps: [
+      'Mix ground beef with 1/2 cup breadcrumbs, 2 eggs, garlic powder, and Italian seasoning.',
+      'Form into golf ball-sized meatballs.',
+      'Bake at 400°F for 20 minutes until cooked through.',
+      'Heat marinara sauce in a saucepan. Add cooked meatballs and simmer 15 minutes.',
+      'Fill hoagie rolls with meatballs and sauce. Top generously with mozzarella.',
+      'Broil until cheese is melted and bubbly. Serve immediately.',
+    ]
+  },
+  {
+    id: 'r24',
+    name: 'Chicken Alfredo Bake',
+    emoji: '🍝',
+    cook_time: '40 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Chicken breast', qty: 2, unit: 'lbs', category: 'cat-meat', price: 9.38 },
+      { name: 'Penne pasta 16 oz', qty: 1, unit: 'pkg', category: 'cat-bread', price: 1.88 },
+      { name: 'Alfredo sauce jar 15 oz', qty: 2, unit: 'jars', category: 'cat-dry', price: 7.96 },
+      { name: 'Mozzarella shredded', qty: 2, unit: 'cups', category: 'cat-dairy', price: 3.98 },
+      { name: 'Garlic powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
+      { name: 'Italian seasoning', qty: 1, unit: 'jar', category: 'cat-dry', price: 2.28 },
+    ],
+    steps: [
+      'Preheat oven to 375°F.',
+      'Cook penne pasta al dente per package. Drain.',
+      'Season and cook chicken in a skillet. Slice into bite-sized pieces.',
+      'Mix pasta, chicken, and alfredo sauce together in a large baking dish.',
+      'Top with shredded mozzarella.',
+      'Bake 20 minutes until cheese is melted and edges are bubbly.',
+    ]
+  },
+  {
+    id: 'r25',
+    name: 'Taco Tuesday (Street Tacos)',
+    emoji: '🌮',
+    cook_time: '25 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Small flour tortillas fajita-size', qty: 1, unit: 'pack', category: 'cat-bread', price: 2.78 },
+      { name: 'Colby Jack shredded 2 cups', qty: 2, unit: 'bags', category: 'cat-dairy', price: 7.96 },
+      { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
+      { name: 'Salsa 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
+      { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
+      { name: 'Limes', qty: 4, unit: 'ea', category: 'cat-produce', price: 1.96 },
+    ],
+    steps: [
+      'Season and cook ground beef with taco seasoning per packet instructions. Drain fat.',
+      'Warm small tortillas in a dry skillet, 30 seconds per side.',
+      'Build street tacos: two tortillas per taco, fill with beef, cheese, sour cream, salsa.',
+      'Squeeze fresh lime juice over the top before eating.',
+    ]
+  },
+  {
+    id: 'r26',
+    name: 'Pancake Breakfast for Dinner',
+    emoji: '🥞',
+    cook_time: '30 min',
+    servings: 5,
+    is_default: true,
+    ingredients: [
+      { name: 'Pancake mix 2 lb bag', qty: 1, unit: 'bag', category: 'cat-dry', price: 4.98 },
+      { name: 'Eggs', qty: 6, unit: 'ea', category: 'cat-dairy', price: 2.94 },
+      { name: 'Gallon whole milk', qty: 1, unit: 'gal', category: 'cat-dairy', price: 3.66 },
+      { name: 'Butter sticks 4-pack', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 3.78 },
+      { name: 'Maple syrup', qty: 1, unit: 'bottle', category: 'cat-dry', price: 4.98 },
+      { name: 'Bacon 1 lb', qty: 1, unit: 'pkg', category: 'cat-meat', price: 7.98 },
+    ],
+    steps: [
+      'Cook bacon first in a skillet until crispy. Set aside on paper towels.',
+      'Mix pancake batter per package instructions with eggs and milk.',
+      'Heat a griddle or large skillet to medium heat. Grease lightly with butter.',
+      'Pour 1/4 cup batter per pancake. Cook 2–3 minutes until bubbles form on surface.',
+      'Flip and cook 1–2 more minutes until golden.',
+      'Serve stacked pancakes with butter, maple syrup, and crispy bacon on the side.',
+    ]
+  },
 ];
 
 // =====================================================
@@ -1123,16 +1598,82 @@ function renderMealPlan() {
   }).join('');
 }
 
+let recipeFilter = 'all';
+
+function getFavorites() {
+  const key = 'favorites_' + (currentUser?.id || 'guest');
+  return new Set(JSON.parse(localStorage.getItem(key) || '[]'));
+}
+
+function toggleFavorite(recipeId, event) {
+  event.stopPropagation();
+  const key = 'favorites_' + (currentUser?.id || 'guest');
+  const favs = getFavorites();
+  if (favs.has(recipeId)) { favs.delete(recipeId); } else { favs.add(recipeId); }
+  localStorage.setItem(key, JSON.stringify([...favs]));
+  renderRecipeLibrary();
+}
+
+function getFilteredRecipes() {
+  const favs = getFavorites();
+  return recipes.filter(r => {
+    if (recipeFilter === 'faves') return favs.has(r.id);
+    if (recipeFilter === 'beef') return r.name.toLowerCase().includes('beef') || r.name.toLowerCase().includes('burger') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('meatball') || r.name.toLowerCase().includes('sloppy') || r.name.toLowerCase().includes('steak') || r.name.toLowerCase().includes('roast') || r.name.toLowerCase().includes('enchilada') || r.name.toLowerCase().includes('nacho');
+    if (recipeFilter === 'chicken') return r.name.toLowerCase().includes('chicken');
+    if (recipeFilter === 'texmex') return r.name.toLowerCase().includes('taco') || r.name.toLowerCase().includes('quesadilla') || r.name.toLowerCase().includes('enchilada') || r.name.toLowerCase().includes('nacho') || r.name.toLowerCase().includes('tex-mex');
+    if (recipeFilter === 'quick') { const mins = parseInt(r.cook_time); return !isNaN(mins) && mins <= 25; }
+    return true;
+  });
+}
+
+function renderRecipeFilters() {
+  const filterBar = document.getElementById('recipeFilters');
+  if (!filterBar) return;
+  const filters = [
+    { id: 'all', label: 'All' },
+    { id: 'faves', label: '❤️ Faves' },
+    { id: 'beef', label: '🥩 Beef' },
+    { id: 'chicken', label: '🍗 Chicken' },
+    { id: 'texmex', label: '🌮 Tex-Mex' },
+    { id: 'quick', label: '⚡ Quick' },
+  ];
+  filterBar.innerHTML = filters.map(f => `
+    <button onclick="setRecipeFilter('${f.id}')" style="
+      background:${recipeFilter === f.id ? 'var(--accent)' : 'var(--bg3)'};
+      color:${recipeFilter === f.id ? '#fff' : 'var(--muted)'};
+      border:1px solid ${recipeFilter === f.id ? 'var(--accent)' : 'var(--border)'};
+      border-radius:20px; padding:5px 12px; font-size:0.78em; font-weight:600;
+      cursor:pointer; white-space:nowrap;
+    ">${f.label}</button>
+  `).join('');
+}
+
+function setRecipeFilter(filterId) {
+  recipeFilter = filterId;
+  renderRecipeLibrary();
+}
+
 function renderRecipeLibrary() {
+  renderRecipeFilters();
+  const favs = getFavorites();
+  const filtered = getFilteredRecipes();
   const container = document.getElementById('recipeLibrary');
-  container.innerHTML = recipes.map(r => `
-    <div class="recipe-option" onclick="viewRecipeDetail('${r.id}')">
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">No recipes found</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(r => `
+    <div class="recipe-option" onclick="viewRecipeDetail('${r.id}')" style="position:relative;">
       <div class="recipe-emoji">${r.emoji}</div>
       <div class="recipe-info">
         <div class="recipe-title">${r.name}</div>
         <div class="recipe-meta">⏱ ${r.cook_time} · 👥 ${r.servings} servings</div>
       </div>
-      <div style="color:var(--muted);font-size:1em;">›</div>
+      <button onclick="toggleFavorite('${r.id}', event)" style="
+        background:none;border:none;cursor:pointer;font-size:1.3em;
+        padding:4px 8px;color:${favs.has(r.id) ? '#e55' : 'var(--muted)'};
+        flex-shrink:0;
+      ">${favs.has(r.id) ? '❤️' : '🤍'}</button>
     </div>
   `).join('');
 }
