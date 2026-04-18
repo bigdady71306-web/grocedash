@@ -253,7 +253,11 @@ async function doLogin() {
   btn.disabled = true;
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
-    showError(error.message);
+    let msg = 'Login failed. Please try again.';
+    if (error.message.includes('Invalid login') || error.message.includes('invalid_credentials')) msg = 'Incorrect email or password. Please try again.';
+    else if (error.message.includes('Email not confirmed')) msg = 'Please check your email and confirm your account first.';
+    else if (error.message.includes('User not found')) msg = 'No account found with that email. Try signing up.';
+    showError(msg);
     btn.innerHTML = 'Sign In →';
     btn.disabled = false;
   } else {
@@ -285,7 +289,7 @@ async function doSignup() {
       btn.disabled = false;
     } else {
       showSuccess('Account created! Redirecting...');
-      setTimeout(() => { window.location.href = 'app.html'; }, 1500);
+      setTimeout(() => { window.location.href = 'app.html?newuser=1'; }, 1500);
     }
   }
 }
