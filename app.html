@@ -422,6 +422,42 @@ body {
 }
 .toggle-switch.on::after { left: 23px; }
 
+/* ===== LIVE PRICE BADGE ===== */
+.live-price-badge {
+  display: inline-block;
+  background: #14532d;
+  color: #4ade80;
+  border: 1px solid #166534;
+  border-radius: 4px;
+  font-size: 0.6em;
+  font-weight: 700;
+  padding: 1px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.kroger-pricing-bar {
+  background: #1a1a1a;
+  border: 1px solid #166534;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.kroger-pricing-bar .kroger-info {
+  flex: 1;
+  font-size: 0.8em;
+  color: #4ade80;
+}
+.kroger-pricing-bar .kroger-sub {
+  font-size: 0.7em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
 /* ===== SAVE BAR ===== */
 .save-bar {
   display: flex;
@@ -521,6 +557,10 @@ body {
     <!-- Recipe Library -->
     <div class="card">
       <div class="card-title">📖 Recipe Library</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input type="text" id="recipeSearch" placeholder="🔍 Find me a recipe..." oninput="filterRecipes()" style="flex:1;background:#0f0f0f;border:1px solid #444;border-radius:8px;color:#eee;padding:10px 14px;font-size:0.9em;">
+        <button class="btn btn-ghost" onclick="surpriseMe()" style="white-space:nowrap;">🎲 Surprise Me</button>
+      </div>
       <div id="recipeFilters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
       <div id="recipeLibrary"></div>
     </div>
@@ -543,6 +583,14 @@ body {
         <div class="budget-label">Left Over</div>
         <div class="budget-value bv-left good" id="budgetLeft">$250.00</div>
       </div>
+    </div>
+
+    <!-- Budget Warning -->
+    <div id="budgetWarning" style="display:none;background:#1a1a1a;border:1px solid #f87171;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.8em;line-height:1.5;"></div>
+
+    <!-- Disclaimer -->
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.75em;color:#888;line-height:1.5;">
+      ⚠️ <strong style="color:#facc15;">Price Disclaimer:</strong> All prices are community estimates based on recent store reports. Actual prices may vary by location, date, and promotions. Expect a <strong style="color:#fff;">$15–$30 adjustment</strong> at checkout. GroceDash is not responsible for price discrepancies.
     </div>
 
     <!-- Pantry Staples Quick Add -->
@@ -584,6 +632,15 @@ body {
     <!-- Grocery list by category -->
     <div id="groceryListContainer"></div>
 
+    <!-- Kroger Live Pricing Bar (shown when Kroger store selected) -->
+    <div id="krogerPricingBar" style="display:none;" class="kroger-pricing-bar">
+      <div class="kroger-info">
+        📍 <strong>Kroger Live Pricing</strong>
+        <div class="kroger-sub" id="krogerStoreName">Connecting to Kroger...</div>
+      </div>
+      <button class="btn btn-sm" onclick="loadKrogerPrices()" id="krogerPriceBtn" style="background:#166534;color:#fff;white-space:nowrap;">🔍 Get Real Prices</button>
+    </div>
+
     <!-- Save bar -->
     <div class="save-bar">
       <button class="btn btn-ghost btn-sm" onclick="clearChecked()" style="flex:1;">Clear Checked</button>
@@ -618,9 +675,27 @@ body {
       <div class="card-title">🏬 Store Settings</div>
       <div class="form-group">
         <label>Preferred Store</label>
-        <input type="text" id="profileStore" value="HEB — N. Frazier, Conroe TX">
+        <input type="text" id="profileStore" value="HEB — N. Frazier, Conroe TX" oninput="onStoreInput(this.value)">
+      </div>
+      <div id="storeDetectionMsg" style="display:none;font-size:0.8em;padding:8px 10px;border-radius:6px;margin-bottom:10px;"></div>
+      <div class="form-group" id="zipCodeGroup" style="display:none;">
+        <label>Store ZIP Code (for live pricing)</label>
+        <input type="text" id="profileZip" placeholder="e.g. 77304" maxlength="5" style="width:100%;">
       </div>
       <button class="btn btn-full" onclick="saveProfile()">Save Store</button>
+    </div>
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+        🛍️ Personal Staples
+        <span onclick="showStaplesInfo()" style="background:#333;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75em;cursor:pointer;color:#ff6b35;font-weight:bold;">?</span>
+      </div>
+      <p style="color:var(--muted);font-size:0.8em;margin-bottom:12px;">Items that auto-add to your list every week.</p>
+      <div id="alwaysBuyList" style="margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="newAlwaysBuyName" placeholder="Item name..." style="flex:1;background:#0f0f0f;border:1px solid #444;border-radius:6px;color:#eee;padding:8px 12px;font-size:0.9em;">
+        <input type="number" id="newAlwaysBuyPrice" placeholder="$0.00" step="0.01" style="width:80px;background:#0f0f0f;border:1px solid #444;border-radius:6px;color:#4ade80;padding:8px;font-size:0.9em;">
+        <button class="btn" onclick="addAlwaysBuy()">+ Add</button>
+      </div>
     </div>
     <div class="card">
       <div class="card-title">⚙️ Account</div>
@@ -733,7 +808,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Brioche burger buns 4-pk', qty: 2, unit: 'packs', category: 'cat-bread', price: 7.96 },
       { name: 'American cheese slices 16 oz', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 4.99 },
       { name: 'Iceberg lettuce head', qty: 1, unit: 'head', category: 'cat-produce', price: 2.49 },
@@ -785,7 +860,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
       { name: 'Flour tortillas large 10-ct', qty: 2, unit: 'packs', category: 'cat-bread', price: 5.58 },
       { name: 'Colby Jack shredded 2 cups', qty: 1, unit: 'bag', category: 'cat-dairy', price: 3.98 },
@@ -809,7 +884,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Spaghetti noodles 32 oz', qty: 1, unit: 'pkg', category: 'cat-bread', price: 2.08 },
       { name: 'Crushed tomatoes 28 oz can', qty: 2, unit: 'cans', category: 'cat-dry', price: 3.58 },
       { name: 'Tomato paste 6 oz', qty: 1, unit: 'can', category: 'cat-dry', price: 1.08 },
@@ -862,10 +937,10 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
       { name: 'Tortilla chips restaurant style 13 oz', qty: 2, unit: 'bags', category: 'cat-snacks', price: 7.98 },
-      { name: 'Colby Jack shredded 2 cups', qty: 2, unit: 'bags', category: 'cat-dairy', price: 7.96 },
+      { name: 'Colby Jack shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 4.98 },
       { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
       { name: 'Salsa 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
       { name: 'Jalapeños sliced (optional)', qty: 1, unit: 'can', category: 'cat-dry', price: 1.88 },
@@ -912,8 +987,8 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
-      { name: 'Large flour tortillas', qty: 10, unit: 'ct', category: 'cat-bread', price: 3.48 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
+      { name: 'Large flour tortillas 20-ct', qty: 1, unit: 'pkg', category: 'cat-bread', price: 4.88 },
       { name: 'Colby Jack shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 4.98 },
       { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
       { name: 'Salsa 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
@@ -959,7 +1034,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2.5, unit: 'lbs', category: 'cat-meat', price: 14.95 },
+      { name: 'Ground beef 80/20 2.5 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 14.95 },
       { name: 'American cheese slices 16 oz', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 4.99 },
       { name: 'Brioche burger buns', qty: 5, unit: 'ct', category: 'cat-bread', price: 5.49 },
       { name: 'Iceberg lettuce head', qty: 1, unit: 'head', category: 'cat-produce', price: 2.49 },
@@ -1010,7 +1085,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Manwich sauce', qty: 2, unit: 'cans', category: 'cat-dry', price: 3.98 },
       { name: 'Hamburger buns', qty: 5, unit: 'ct', category: 'cat-bread', price: 2.98 },
       { name: 'Colby Jack shredded 2 cups', qty: 1, unit: 'bag', category: 'cat-dairy', price: 3.98 },
@@ -1048,7 +1123,7 @@ const DEFAULT_RECIPES = [
   },
   {
     id: 'r14',
-    name: 'Biscuits & Gravy',
+    name: 'Breakfast for Dinner — Biscuits & Gravy',
     emoji: '🍳',
     cook_time: '30 min',
     servings: 5,
@@ -1078,7 +1153,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Chicken drumsticks', qty: 10, unit: 'pieces', category: 'cat-meat', price: 7.98 },
+      { name: 'Chicken drumsticks family pack', qty: 1, unit: 'pkg', category: 'cat-meat', price: 9.98 },
       { name: 'BBQ sauce 18 oz', qty: 1, unit: 'bottle', category: 'cat-dry', price: 2.99 },
       { name: 'Garlic powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
       { name: 'Onion powder', qty: 1, unit: 'shaker', category: 'cat-dry', price: 1.48 },
@@ -1125,10 +1200,10 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Flour tortillas large 10-ct', qty: 1, unit: 'pack', category: 'cat-bread', price: 2.79 },
       { name: 'Enchilada sauce', qty: 2, unit: 'cans', category: 'cat-dry', price: 3.58 },
-      { name: 'Colby Jack shredded 2 cups', qty: 2, unit: 'bags', category: 'cat-dairy', price: 7.96 },
+      { name: 'Colby Jack shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 4.98 },
       { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
       { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
     ],
@@ -1149,7 +1224,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Kidney beans', qty: 2, unit: 'cans', category: 'cat-dry', price: 2.58 },
       { name: 'Diced tomatoes 14.5 oz', qty: 2, unit: 'cans', category: 'cat-dry', price: 2.58 },
       { name: 'Chili seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
@@ -1195,7 +1270,7 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ribeye or NY strip steaks', qty: 5, unit: 'steaks', category: 'cat-meat', price: 49.95 },
+      { name: 'NY strip steaks family pack', qty: 1, unit: 'pkg', category: 'cat-meat', price: 28.00 },
       { name: 'Butter sticks 4-pack', qty: 1, unit: 'pkg', category: 'cat-dairy', price: 3.78 },
       { name: 'Garlic bulb', qty: 1, unit: 'head', category: 'cat-produce', price: 0.78 },
       { name: 'Fresh rosemary', qty: 1, unit: 'bunch', category: 'cat-produce', price: 1.98 },
@@ -1267,13 +1342,13 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Breadcrumbs Italian 15 oz', qty: 1, unit: 'canister', category: 'cat-dry', price: 2.48 },
       { name: 'Eggs', qty: 2, unit: 'ea', category: 'cat-dairy', price: 0.98 },
       { name: 'Italian seasoning', qty: 1, unit: 'jar', category: 'cat-dry', price: 2.28 },
-      { name: 'Marinara sauce 24 oz', qty: 2, unit: 'jars', category: 'cat-dry', price: 7.96 },
-      { name: 'Hoagie rolls', qty: 5, unit: 'ct', category: 'cat-bread', price: 4.98 },
-      { name: 'Mozzarella shredded', qty: 2, unit: 'cups', category: 'cat-dairy', price: 3.98 },
+      { name: 'Marinara sauce 24 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
+      { name: 'Hoagie rolls 5-pk', qty: 1, unit: 'pkg', category: 'cat-bread', price: 4.98 },
+      { name: 'Mozzarella shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 3.98 },
     ],
     steps: [
       'Mix ground beef with 1/2 cup breadcrumbs, 2 eggs, garlic powder, and Italian seasoning.',
@@ -1316,9 +1391,9 @@ const DEFAULT_RECIPES = [
     servings: 5,
     is_default: true,
     ingredients: [
-      { name: 'Ground beef 80/20', qty: 2, unit: 'lbs', category: 'cat-meat', price: 11.97 },
+      { name: 'Ground beef 80/20 2 lbs', qty: 1, unit: 'pkg', category: 'cat-meat', price: 11.97 },
       { name: 'Small flour tortillas fajita-size', qty: 1, unit: 'pack', category: 'cat-bread', price: 2.78 },
-      { name: 'Colby Jack shredded 2 cups', qty: 2, unit: 'bags', category: 'cat-dairy', price: 7.96 },
+      { name: 'Colby Jack shredded 16 oz', qty: 1, unit: 'bag', category: 'cat-dairy', price: 4.98 },
       { name: 'Sour cream 24 oz', qty: 1, unit: 'tub', category: 'cat-dairy', price: 2.74 },
       { name: 'Salsa 16 oz', qty: 1, unit: 'jar', category: 'cat-dry', price: 3.98 },
       { name: 'Taco seasoning packet', qty: 2, unit: 'pkts', category: 'cat-dry', price: 1.96 },
@@ -1417,15 +1492,24 @@ const HEB_PRICES = [
 ];
 
 // Always-buy staples
-const STAPLES = [
-  { name: 'Purina ONE Chicken & Rice 8 lb', category: 'cat-household', price: 16.28, qty: 1 },
-  { name: 'Milk-Bone Flavor Snacks 60 oz', category: 'cat-household', price: 8.98, qty: 1 },
-  { name: 'Q-tips 500 ct', category: 'cat-household', price: 2.98, qty: 1 },
-  { name: 'Gallon whole milk', category: 'cat-dairy', price: 3.66, qty: 1 },
-  { name: 'Eggs 30-pack', category: 'cat-dairy', price: 7.50, qty: 1 },
-  { name: 'Butter sticks 4-pack', category: 'cat-dairy', price: 3.78, qty: 2 },
-  { name: 'White Monster 16oz 12-pack', category: 'cat-snacks', price: 23.98, qty: 1 },
-  { name: 'Red Bull Sugar Free 8oz 12-pack', category: 'cat-snacks', price: 21.98, qty: 1 },
+// Personal staples — loaded from user profile, empty by default
+// Each family sets their own in Profile → Always-Buy Items
+const STAPLES = [];
+
+// POPUP only — common household staples, assume family has these
+// Ask if they need to restock before adding to list
+const COOKING_STAPLES = [
+  { name: 'Ketchup', cat: 'cat-dry', price: 2.48 },
+  { name: 'Mayonnaise 30 oz', cat: 'cat-dry', price: 4.88 },
+  { name: 'Mustard', cat: 'cat-dry', price: 1.98 },
+  { name: 'Salt', cat: 'cat-dry', price: 1.48 },
+  { name: 'Black Pepper', cat: 'cat-dry', price: 2.98 },
+  { name: 'Garlic Powder', cat: 'cat-dry', price: 1.98 },
+  { name: 'Vegetable Oil 48oz', cat: 'cat-dry', price: 5.48 },
+  { name: 'Butter sticks 4-pack', cat: 'cat-dairy', price: 3.78 },
+  { name: '2% Milk gallon', cat: 'cat-dairy', price: 3.66 },
+  { name: 'Eggs 30-pack', cat: 'cat-dairy', price: 7.50 },
+  { name: 'Sandwich bread loaf', cat: 'cat-bread', price: 2.48 },
 ];
 
 // =====================================================
@@ -1596,33 +1680,65 @@ function getRecipeById(id) {
   return recipes.find(r => r.id === id);
 }
 
+function getRecipeCost(recipe) {
+  if (!recipe || !recipe.ingredients) return 0;
+  return recipe.ingredients.reduce((sum, ing) => sum + ((ing.price || 0) * (ing.qty || 1)), 0);
+}
+
 function buildMyWeek() {
   try {
     const dayKeys = ['sun','mon','tue','wed','thu','fri','sat'];
     const available = recipes.length ? recipes : DEFAULT_RECIPES;
+    const budget = familyProfile.weekly_budget || 250;
+    // Reserve $50 for staples (dog food, drinks, etc.)
+    const mealBudget = budget - 80; // Reserve $80 for staples, drinks, household
+
     const lastWeekIds = new Set(Object.values(mealPlan).filter(id => id && id !== 'dinner-out'));
     let pool = available.filter(r => !lastWeekIds.has(r.id));
     if (pool.length < 6) pool = available;
+
     // Prioritize favorites
     const userId = currentUser?.id || 'guest';
     const favs = JSON.parse(localStorage.getItem('favorites_' + userId) || '[]');
     const favPool = pool.filter(r => favs.includes(r.id));
     const nonFavPool = pool.filter(r => !favs.includes(r.id));
     const combined = [...favPool, ...nonFavPool].sort(() => Math.random() - 0.5);
+
     localStorage.setItem('lastWeekMeals_' + userId, JSON.stringify(Object.values(mealPlan)));
-    mealPlan = {};
-    mealPlan['sun'] = 'dinner-out';
-    for (let i = 1; i < 7; i++) {
-      mealPlan[dayKeys[i]] = combined[(i-1) % combined.length].id;
+
+    // Build week within budget
+    const newPlan = { sun: 'dinner-out' };
+    let runningCost = 0;
+    let mealsAdded = 0;
+    const mealDays = ['mon','tue','wed','thu','fri','sat'];
+
+    for (const recipe of combined) {
+      if (mealsAdded >= 6) break;
+      const cost = getRecipeCost(recipe);
+      if (runningCost + cost <= mealBudget) {
+        newPlan[mealDays[mealsAdded]] = recipe.id;
+        runningCost += cost;
+        mealsAdded++;
+      }
     }
+
+    // Fill any remaining days with cheapest available
+    for (let i = mealsAdded; i < 6; i++) {
+      const cheapest = combined.find(r => !Object.values(newPlan).includes(r.id));
+      if (cheapest) newPlan[mealDays[i]] = cheapest.id;
+    }
+
+    mealPlan = newPlan;
     renderMealPlan();
     saveLocalState();
+
     const btn = document.querySelector('button[onclick="buildMyWeek()"]');
     if (btn) {
       const orig = btn.innerHTML;
-      btn.innerHTML = '✅ Week Built! Push to grocery list ↓';
-      btn.style.background = '#166534';
-      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 3000);
+      const estCost = runningCost + 50;
+      btn.innerHTML = `✅ Week Built! Est. $${estCost.toFixed(0)} of $${budget} budget`;
+      btn.style.background = estCost <= budget ? '#166534' : '#7f1d1d';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 4000);
     }
   } catch(e) { alert('Error: ' + e.message); }
 }
@@ -1704,10 +1820,31 @@ function setRecipeFilter(filterId) {
   renderRecipeLibrary();
 }
 
+function filterRecipes() {
+  const q = document.getElementById('recipeSearch').value.toLowerCase().trim();
+  const all = recipes.length ? recipes : DEFAULT_RECIPES;
+  const filtered = q ? all.filter(r =>
+    r.name.toLowerCase().includes(q) ||
+    (r.tags || []).some(t => t.toLowerCase().includes(q)) ||
+    (r.ingredients || []).some(i => i.name.toLowerCase().includes(q))
+  ) : all;
+  renderRecipeLibraryWith(filtered);
+}
+
+function surpriseMe() {
+  const all = recipes.length ? recipes : DEFAULT_RECIPES;
+  const pick = all[Math.floor(Math.random() * all.length)];
+  if (pick) viewRecipeDetail(pick.id);
+}
+
 function renderRecipeLibrary() {
+  renderRecipeLibraryWith(recipes.length ? recipes : DEFAULT_RECIPES);
+}
+
+function renderRecipeLibraryWith(list) {
   renderRecipeFilters();
   const favs = getFavorites();
-  const filtered = getFilteredRecipes();
+  const filtered = list;
   const container = document.getElementById('recipeLibrary');
   if (filtered.length === 0) {
     container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px;">No recipes found</div>';
@@ -1814,6 +1951,14 @@ async function saveMealPlanToSupabase() {
   } catch(e) { /* tables may not exist */ }
 }
 
+// Normalize item name for dedup comparison
+function normName(n) {
+  return n.toLowerCase()
+    .replace(/[^a-z0-9]/g,' ')
+    .replace(/\b(oz|lb|lbs|pk|pkg|pack|bag|jar|can|bottle|gallon|bunch|head|slice|slices|shredded|whole|large|small|medium|fresh|frozen|boneless|skinless|family|value|heb|grade|aa|a|extra)\b/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+
 function generateGroceryFromPlan() {
   const dayKeys = ['sun','mon','tue','wed','thu','fri','sat'];
   const addedIngredients = new Map();
@@ -1824,24 +1969,36 @@ function generateGroceryFromPlan() {
     const recipe = getRecipeById(recipeId);
     if (!recipe) return;
     recipe.ingredients.forEach(ing => {
-      const existing = addedIngredients.get(ing.name);
+      const normKey = normName(ing.name);
+      const existing = addedIngredients.get(normKey);
       if (existing) {
-        existing.qty += ing.qty;
+        existing.qty = Math.max(existing.qty, ing.qty);
       } else {
-        addedIngredients.set(ing.name, { ...ing, checked: false, id: uid(), from_recipe: recipe.name });
+        addedIngredients.set(normKey, { ...ing, checked: false, id: uid(), from_recipe: recipe.name });
       }
     });
   });
 
-  // Keep existing staples/manual items, merge recipe items
-  const nonRecipeItems = groceryItems.filter(i => !i.from_recipe);
+  // Clear old recipe/staple items, keep only manual items
+  const manualItems = groceryItems.filter(i => i.manual && !i.from_staple && !i.from_recipe);
   const recipeItems = Array.from(addedIngredients.values());
-  
-  groceryItems = [...nonRecipeItems, ...recipeItems];
-  
-  // Add staples if not present
+  groceryItems = [...recipeItems, ...manualItems];
+
+  // Add user's personal always-buy items
+  getAlwaysBuy().forEach(s => {
+    const sKey = normName(s.name);
+    const alreadyHave = groceryItems.find(i => normName(i.name).includes(sKey.split(' ')[0]));
+    if (!alreadyHave) groceryItems.push({ ...s, checked: false, id: uid(), from_staple: true });
+  });
+
+  // Add staples only if not already covered
   STAPLES.forEach(s => {
-    if (!groceryItems.find(i => i.name === s.name)) {
+    const sKey = normName(s.name);
+    const alreadyHave = groceryItems.find(i => {
+      const iKey = normName(i.name);
+      return iKey.includes(sKey.split(' ')[0]) || sKey.includes(iKey.split(' ')[0]);
+    });
+    if (!alreadyHave) {
       groceryItems.push({ ...s, checked: false, id: uid(), from_staple: true });
     }
   });
@@ -1849,7 +2006,50 @@ function generateGroceryFromPlan() {
   saveLocalState();
   renderGroceryList();
   switchTab('grocery');
-  showToast('🛒 Grocery list updated from meal plan!');
+
+  // Show cooking staples popup — user checks what they need to restock
+  const missing = COOKING_STAPLES.filter(s => !groceryItems.find(i => normName(i.name).includes(normName(s.name).split(' ')[0])));
+  if (missing.length) showStaplesPopup(missing);
+  else showToast('🛒 Grocery list updated from meal plan!');
+}
+
+function showStaplesPopup(missing) {
+  const existing = document.getElementById('staplesPopup');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'staplesPopup';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:#1a1a1a;border:1px solid #ff6b35;border-radius:16px;width:100%;max-width:480px;padding:20px;max-height:80vh;overflow-y:auto;">
+      <div style="font-size:1.1em;font-weight:700;color:#ff6b35;margin-bottom:4px;">🧂 Cooking Staples Check</div>
+      <div style="color:#888;font-size:0.85em;margin-bottom:16px;">You may need these to complete your meals. Check any you need to add to your list:</div>
+      <div id="staplesCheckList">
+        ${missing.map(s => `
+          <label style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a2a;cursor:pointer;">
+            <input type="checkbox" value="${s.name}" data-price="${s.price}" data-cat="${s.cat}" style="width:20px;height:20px;accent-color:#ff6b35;">
+            <span style="flex:1;">${s.name}</span>
+            <span style="color:#4ade80;">$${s.price.toFixed(2)}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button onclick="addCheckedStaples()" class="btn btn-primary" style="flex:1;">+ Add Selected</button>
+        <button onclick="document.getElementById('staplesPopup').remove();showToast('List ready!');" class="btn btn-ghost" style="flex:1;">I Have These</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function addCheckedStaples() {
+  const checks = document.querySelectorAll('#staplesCheckList input:checked');
+  checks.forEach(c => {
+    groceryItems.push({ id: uid(), name: c.value, category: c.dataset.cat, price: parseFloat(c.dataset.price), qty: 1, checked: false, manual: true });
+  });
+  saveLocalState();
+  renderGroceryList();
+  document.getElementById('staplesPopup').remove();
+  showToast(`✅ Added ${checks.length} staples to your list!`);
 }
 
 // =====================================================
@@ -1882,6 +2082,28 @@ function renderGroceryList() {
   document.getElementById('budgetLeft').textContent = fmt(left);
   document.getElementById('budgetLeft').className = `budget-value bv-left ${leftCls}`;
 
+  // Over budget warning
+  const warningEl = document.getElementById('budgetWarning');
+  if (warningEl) {
+    if (left < -30) {
+      const over = Math.abs(left);
+      // Find most expensive non-staple items to suggest removing
+      const suggestions = [...groceryItems]
+        .filter(i => !i.from_staple)
+        .sort((a, b) => (b.price * (b.qty||1)) - (a.price * (a.qty||1)))
+        .slice(0, 3)
+        .map(i => `${i.name} ($${(i.price*(i.qty||1)).toFixed(2)})`)
+        .join(', ');
+      warningEl.style.display = 'block';
+      warningEl.innerHTML = `⚠️ <strong style="color:#f87171;">Over budget by $${over.toFixed(2)}!</strong> Consider removing: <span style="color:#facc15;">${suggestions}</span>`;
+    } else if (left < 30) {
+      warningEl.style.display = 'block';
+      warningEl.innerHTML = `🟡 <strong>Getting close to budget</strong> — only <strong>$${left.toFixed(2)}</strong> remaining.`;
+    } else {
+      warningEl.style.display = 'none';
+    }
+  }
+
   const container = document.getElementById('groceryListContainer');
   let html = '';
 
@@ -1901,7 +2123,7 @@ function renderGroceryList() {
       html += `<div class="grocery-item ${cat} ${gotCls}" id="gi-${item.id}">
         <input type="checkbox" class="item-check" ${item.checked ? 'checked' : ''} onchange="toggleItem('${item.id}')">
         <div class="item-main">
-          <div class="item-name">${item.name}</div>
+          <div class="item-name">${item.name}${item.live_price ? ' <span class="live-price-badge">📍 Live Price</span>' : ''}</div>
           ${item.from_recipe ? `<div class="item-tag">📋 ${item.from_recipe}</div>` : ''}
           ${item.from_staple ? `<div class="item-tag">📌 Staple</div>` : ''}
         </div>
@@ -1923,6 +2145,7 @@ function renderGroceryList() {
   }
 
   container.innerHTML = html;
+  checkKrogerBarVisibility();
 }
 
 function toggleItem(id) {
@@ -2119,18 +2342,104 @@ function renderProfile() {
   if (familyProfile.member_count) document.getElementById('profileMembers').value = familyProfile.member_count;
   if (familyProfile.dietary_notes) document.getElementById('profileDiet').value = familyProfile.dietary_notes;
   if (familyProfile.weekly_budget) document.getElementById('profileBudget').value = familyProfile.weekly_budget;
-  if (familyProfile.store) document.getElementById('profileStore').value = familyProfile.store;
+  if (familyProfile.store) {
+    document.getElementById('profileStore').value = familyProfile.store;
+    onStoreInput(familyProfile.store);
+  }
+  if (familyProfile.kroger_zip) {
+    const zipEl = document.getElementById('profileZip');
+    if (zipEl) zipEl.value = familyProfile.kroger_zip;
+  }
   if (familyProfile.name) document.getElementById('headerFamilyName').textContent = familyProfile.name;
+  renderAlwaysBuy();
+}
+
+function showStaplesInfo() {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  el.innerHTML = `
+    <div style="background:#1a1a1a;border:1px solid #ff6b35;border-radius:16px;padding:24px;max-width:400px;width:100%;">
+      <div style="font-size:1.1em;font-weight:700;color:#ff6b35;margin-bottom:12px;">🛍️ What are Personal Staples?</div>
+      <p style="color:#ccc;font-size:0.9em;line-height:1.7;margin-bottom:12px;">
+        Personal Staples are items your family buys <strong>every single week</strong> — things you always run out of or always need on hand.
+      </p>
+      <p style="color:#888;font-size:0.85em;line-height:1.7;margin-bottom:16px;">
+        <strong style="color:#facc15;">Examples:</strong><br>
+        🧄 Salt, pepper, garlic powder<br>
+        🫚 Cooking oil, olive oil<br>
+        🧈 Butter, eggs, milk<br>
+        🍞 Bread<br>
+        🥩 Bacon or sausage<br>
+        🐶 Pet food, treats<br>
+        🥤 Drinks your family always buys<br><br>
+        <em>These are NOT added by default because every family is different. Add yours below and they’ll appear on your grocery list automatically every week.</em>
+      </p>
+      <button onclick="this.closest('div[style]').remove()" class="btn btn-full">Got it!</button>
+    </div>
+  `;
+  document.body.appendChild(el);
+}
+
+function getAlwaysBuy() {
+  return JSON.parse(localStorage.getItem('alwaysBuy_' + (currentUser?.id||'guest')) || '[]');
+}
+function saveAlwaysBuy(items) {
+  localStorage.setItem('alwaysBuy_' + (currentUser?.id||'guest'), JSON.stringify(items));
+}
+function renderAlwaysBuy() {
+  const items = getAlwaysBuy();
+  const el = document.getElementById('alwaysBuyList');
+  if (!el) return;
+  if (!items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.85em;">No items yet. Add your personal staples above.</p>'; return; }
+  el.innerHTML = items.map((item, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #222;">
+      <span style="flex:1;">${item.name}</span>
+      <span style="color:#4ade80;">$${item.price.toFixed(2)}</span>
+      <button onclick="removeAlwaysBuy(${i})" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:1em;">✕</button>
+    </div>
+  `).join('');
+}
+function addAlwaysBuy() {
+  const name = document.getElementById('newAlwaysBuyName').value.trim();
+  const price = parseFloat(document.getElementById('newAlwaysBuyPrice').value) || 0;
+  if (!name) return;
+  const items = getAlwaysBuy();
+  items.push({ name, price, category: 'cat-household' });
+  saveAlwaysBuy(items);
+  renderAlwaysBuy();
+  document.getElementById('newAlwaysBuyName').value = '';
+  document.getElementById('newAlwaysBuyPrice').value = '';
+}
+function removeAlwaysBuy(i) {
+  const items = getAlwaysBuy();
+  items.splice(i, 1);
+  saveAlwaysBuy(items);
+  renderAlwaysBuy();
 }
 
 async function saveProfile() {
+  const storeName = document.getElementById('profileStore').value.trim();
+  const zipVal = (document.getElementById('profileZip') || {}).value || '';
+
   const profile = {
     name: document.getElementById('profileName').value.trim(),
     member_count: parseInt(document.getElementById('profileMembers').value) || 5,
     dietary_notes: document.getElementById('profileDiet').value.trim(),
     weekly_budget: parseFloat(document.getElementById('profileBudget').value) || 250,
-    store: document.getElementById('profileStore').value.trim(),
+    store: storeName,
   };
+
+  if (zipVal) profile.kroger_zip = zipVal;
+
+  // Show store detection message
+  const msgEl = document.getElementById('storeDetectionMsg');
+  if (msgEl && msgEl.style.display === 'none') onStoreInput(storeName);
+
+  // Reset location ID if store changed
+  if (familyProfile.store !== storeName) {
+    familyProfile.kroger_location_id = null;
+  }
+
   familyProfile = { ...familyProfile, ...profile };
   document.getElementById('headerFamilyName').textContent = profile.name;
   saveLocalState();
@@ -2184,6 +2493,149 @@ function showDbSetupNotice() {
   el.style.cssText = 'background:#1a1000;border:1px solid #ff6b35;border-radius:10px;padding:12px 14px;margin:0 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:0.82em;';
   el.innerHTML = `<span style="color:#facc15;">⚠️ Cloud sync needs setup. App works locally!</span><a href="setup.html" style="color:#ff6b35;font-weight:700;white-space:nowrap;">Setup DB →</a>`;
   document.getElementById('appContent').prepend(el);
+}
+
+// =====================================================
+// KROGER LIVE PRICING
+// =====================================================
+const KROGER_STORE_CHAINS = ['kroger', "fry's", 'frys', "ralph's", 'ralphs', 'king soopers', "smith's", 'smiths', 'fred meyer'];
+
+function isKrogerStore(storeName) {
+  const lower = (storeName || '').toLowerCase();
+  return KROGER_STORE_CHAINS.some(chain => lower.includes(chain));
+}
+
+function onStoreInput(val) {
+  const msgEl = document.getElementById('storeDetectionMsg');
+  const zipGroup = document.getElementById('zipCodeGroup');
+  if (!msgEl) return;
+  if (isKrogerStore(val)) {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#14532d';
+    msgEl.style.color = '#4ade80';
+    msgEl.style.border = '1px solid #166534';
+    msgEl.textContent = '📍 Kroger-affiliated store detected! Live pricing will be enabled after saving.';
+    if (zipGroup) zipGroup.style.display = 'block';
+  } else if (val.trim().length > 2) {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#1a1a0a';
+    msgEl.style.color = '#facc15';
+    msgEl.style.border = '1px solid #713f12';
+    msgEl.textContent = `🛒 Live pricing coming soon for ${val.trim()}. Using community estimates.`;
+    if (zipGroup) zipGroup.style.display = 'none';
+  } else {
+    msgEl.style.display = 'none';
+    if (zipGroup) zipGroup.style.display = 'none';
+  }
+}
+
+function checkKrogerBarVisibility() {
+  const store = familyProfile.store || '';
+  const bar = document.getElementById('krogerPricingBar');
+  const nameEl = document.getElementById('krogerStoreName');
+  if (!bar) return;
+  if (isKrogerStore(store)) {
+    bar.style.display = 'flex';
+    if (nameEl) nameEl.textContent = store;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+async function loadKrogerPrices() {
+  const btn = document.getElementById('krogerPriceBtn');
+  const locationId = familyProfile.kroger_location_id;
+
+  if (!locationId) {
+    // Try to find location by zip
+    const zip = (document.getElementById('profileZip') || {}).value ||
+                 familyProfile.kroger_zip || '';
+    if (!zip || zip.length < 5) {
+      showToast('⚠️ Enter your store ZIP code in Profile to enable live pricing');
+      switchTab('profile');
+      const zipEl = document.getElementById('profileZip');
+      if (zipEl) { zipEl.focus(); zipEl.style.borderColor = 'var(--accent)'; }
+      return;
+    }
+    // Lookup location first
+    btn.textContent = '⏳ Finding store...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`/api/kroger?action=locations&zip=${encodeURIComponent(zip)}`);
+      const data = await res.json();
+      if (!data.ok || !data.locations.length) {
+        showToast('❌ No Kroger stores found for that ZIP code');
+        btn.textContent = '🔍 Get Real Prices';
+        btn.disabled = false;
+        return;
+      }
+      // Use the first location
+      familyProfile.kroger_location_id = data.locations[0].locationId;
+      familyProfile.kroger_zip = zip;
+      saveLocalState();
+      // Update store name display
+      const nameEl = document.getElementById('krogerStoreName');
+      if (nameEl) nameEl.textContent = data.locations[0].name + ' — ' + data.locations[0].address;
+    } catch (e) {
+      showToast('❌ Could not connect to Kroger API: ' + e.message);
+      btn.textContent = '🔍 Get Real Prices';
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  // Now fetch prices for all grocery items
+  const krogerLocId = familyProfile.kroger_location_id;
+  const items = groceryItems.filter(i => !i.checked);
+  if (!items.length) {
+    showToast('No items to price!');
+    return;
+  }
+
+  btn.textContent = `⏳ Loading prices (0/${items.length})...`;
+  btn.disabled = true;
+
+  let updated = 0;
+  for (let idx = 0; idx < items.length; idx++) {
+    const item = items[idx];
+    btn.textContent = `⏳ Loading prices (${idx + 1}/${items.length})...`;
+    try {
+      // Use simplified search term (first 3 words of item name)
+      const term = item.name.split(/[,\-\/]/)[0].trim().split(' ').slice(0, 3).join(' ');
+      const res = await fetch(`/api/kroger?action=products&term=${encodeURIComponent(term)}&locationId=${encodeURIComponent(krogerLocId)}`);
+      const data = await res.json();
+      if (data.ok && data.products && data.products.length > 0) {
+        // Find best match — prefer products with a price
+        const priced = data.products.find(p => p.price !== null);
+        if (priced && priced.price) {
+          const realPrice = priced.salePrice || priced.price;
+          const grocItem = groceryItems.find(i => i.id === item.id);
+          if (grocItem) {
+            grocItem.price = realPrice;
+            grocItem.live_price = true;
+            grocItem.live_price_source = 'Kroger';
+            updated++;
+          }
+        }
+      }
+    } catch (e) {
+      // Skip failed items silently
+    }
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 150));
+  }
+
+  saveLocalState();
+  renderGroceryList();
+
+  btn.textContent = '🔍 Get Real Prices';
+  btn.disabled = false;
+
+  if (updated > 0) {
+    showToast(`📍 Kroger prices loaded — ${updated} items updated!`);
+  } else {
+    showToast('⚠️ No Kroger prices found for your items');
+  }
 }
 
 let toastTimer;
