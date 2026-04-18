@@ -507,6 +507,9 @@ body {
   <div class="tab-section active" id="tab-meals">
     <div class="card">
       <div class="card-title">📅 Week of <span id="weekLabel">...</span></div>
+      <button class="btn btn-primary btn-full" onclick="buildMyWeek()" style="margin-bottom:12px;font-size:1em;padding:14px;">
+        ✨ Build My Week
+      </button>
       <div class="week-grid" id="weekGrid">
         <!-- Days injected by JS -->
       </div>
@@ -539,6 +542,23 @@ body {
       <div class="budget-item">
         <div class="budget-label">Left Over</div>
         <div class="budget-value bv-left good" id="budgetLeft">$250.00</div>
+      </div>
+    </div>
+
+    <!-- Pantry Staples Quick Add -->
+    <div class="card" style="margin-bottom:8px;">
+      <div class="card-title" style="margin-bottom:10px;">🧂 Pantry Staples — Quick Add</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Butter 4-pack','cat-dairy',7.56)">🧈 Butter</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Ketchup','cat-dry',2.48)">🍅 Ketchup</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Ranch Dressing','cat-dry',3.98)">🥗 Ranch</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Vegetable Oil 48oz','cat-dry',5.48)">🫙 Cooking Oil</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Salt','cat-dry',1.48)">🧂 Salt</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Black Pepper','cat-dry',2.98)">🌶️ Pepper</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Garlic Powder','cat-dry',1.98)">🧄 Garlic Powder</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Minced Garlic jar','cat-dry',2.98)">🧄 Minced Garlic</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Mustard','cat-dry',1.98)">💛 Mustard</button>
+        <button class="btn btn-ghost" style="font-size:0.8em;padding:6px 12px;" onclick="quickAdd('Olive Oil','cat-dry',4.98)">🫒 Olive Oil</button>
       </div>
     </div>
 
@@ -1576,6 +1596,37 @@ function getRecipeById(id) {
   return recipes.find(r => r.id === id);
 }
 
+function buildMyWeek() {
+  try {
+    const dayKeys = ['sun','mon','tue','wed','thu','fri','sat'];
+    const available = recipes.length ? recipes : DEFAULT_RECIPES;
+    const lastWeekIds = new Set(Object.values(mealPlan).filter(id => id && id !== 'dinner-out'));
+    let pool = available.filter(r => !lastWeekIds.has(r.id));
+    if (pool.length < 6) pool = available;
+    // Prioritize favorites
+    const userId = currentUser?.id || 'guest';
+    const favs = JSON.parse(localStorage.getItem('favorites_' + userId) || '[]');
+    const favPool = pool.filter(r => favs.includes(r.id));
+    const nonFavPool = pool.filter(r => !favs.includes(r.id));
+    const combined = [...favPool, ...nonFavPool].sort(() => Math.random() - 0.5);
+    localStorage.setItem('lastWeekMeals_' + userId, JSON.stringify(Object.values(mealPlan)));
+    mealPlan = {};
+    mealPlan['sun'] = 'dinner-out';
+    for (let i = 1; i < 7; i++) {
+      mealPlan[dayKeys[i]] = combined[(i-1) % combined.length].id;
+    }
+    renderMealPlan();
+    saveLocalState();
+    const btn = document.querySelector('button[onclick="buildMyWeek()"]');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ Week Built! Push to grocery list ↓';
+      btn.style.background = '#166534';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 3000);
+    }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
 function renderMealPlan() {
   const weekStart = new Date(getWeekStart() + 'T12:00:00');
   document.getElementById('weekLabel').textContent = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1947,6 +1998,18 @@ document.addEventListener('click', e => {
     document.getElementById('autocompleteList').style.display = 'none';
   }
 });
+
+function quickAdd(name, cat, price) {
+  groceryItems.push({ id: 'i' + Date.now() + Math.random(), name, category: cat, price, qty: 1, checked: false, manual: true });
+  saveLocalState();
+  renderGroceryList();
+  // Flash feedback
+  const btns = document.querySelectorAll('.btn-ghost');
+  btns.forEach(b => { if (b.textContent.includes(name.split(' ')[0])) {
+    b.style.background = '#166534'; b.style.color = '#fff';
+    setTimeout(() => { b.style.background = ''; b.style.color = ''; }, 800);
+  }});
+}
 
 function addManualItem() {
   const name = document.getElementById('newItemName').value.trim();
