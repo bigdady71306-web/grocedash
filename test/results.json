@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-04-18T22:59:03.978Z",
+  "url": "https://grocedash.vercel.app",
+  "loginSuccess": true,
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "name": "Login Page Loads",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Login Error Handling",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Signup Flow",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Home Tab",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Meals Tab",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Build My Week",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Grocery Tab",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Push to Grocery List",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Shopping Mode",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Profile Tab",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Recipe Search",
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "name": "Share List",
+      "status": "PASS",
+      "error": null
+    }
+  ]
+}

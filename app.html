@@ -223,6 +223,12 @@ body {
 }
 .add-item-row input[type="text"] { flex: 1; min-width: 120px; }
 .add-item-row input[type="number"] { width: 80px; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  filter: invert(1);
+  cursor: pointer;
+}
 .add-item-row select { min-width: 130px; flex: 1; }
 .add-item-row input:focus, .add-item-row select:focus { outline: none; border-color: var(--accent); }
 .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 0.9em; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
@@ -762,6 +768,15 @@ body {
     </div>
 
     <!-- Grocery list by category -->
+    <!-- Action Bar -->
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="clearChecked()" style="flex:1;">Clear Checked</button>
+      <button class="btn btn-ghost btn-sm" onclick="newWeek()" style="flex:1;">New Week</button>
+      <button class="btn btn-sm" onclick="saveTrip()" style="flex:1.5;">💾 Save Trip</button>
+      <button class="btn btn-ghost btn-sm" onclick="shareGroceryList()" style="flex:1;">📤 Share</button>
+      <button class="btn btn-sm" onclick="enterShoppingMode()" style="flex:1;background:#1d4ed8;">🛍️ Shop</button>
+    </div>
+
     <div id="groceryListContainer"></div>
 
     <!-- Kroger Live Pricing Bar (shown when Kroger store selected) -->
@@ -774,13 +789,7 @@ body {
     </div>
 
     <!-- Save bar -->
-    <div class="save-bar" style="flex-wrap:wrap;gap:6px;">
-      <button class="btn btn-ghost btn-sm" onclick="clearChecked()" style="flex:1;">Clear Checked</button>
-      <button class="btn btn-ghost btn-sm" onclick="newWeek()" style="flex:1;">New Week</button>
-      <button class="btn btn-sm" onclick="saveTrip()" style="flex:1.5;">💾 Save Trip</button>
-      <button class="btn btn-ghost btn-sm" onclick="shareGroceryList()" style="flex:1;">📤 Share</button>
-      <button class="btn btn-sm" onclick="enterShoppingMode()" style="flex:1;background:#1d4ed8;">🛍️ Shop</button>
-    </div>
+
   </div>
 
   <!-- ===== PROFILE TAB ===== -->
@@ -1992,12 +2001,15 @@ function buildMyWeek() {
       }
     }
 
-    // Fill any remaining days — never duplicate
+    // Fill any remaining days — respect budget, never duplicate
     const sortedByCost = [...combined].sort((a,b) => getRecipeCost(a) - getRecipeCost(b));
     for (let i = mealsAdded; i < 7; i++) {
       const used = new Set(Object.values(newPlan).filter(Boolean));
-      const next = sortedByCost.find(r => !used.has(r.id));
-      if (next) newPlan[mealDays[i]] = next.id;
+      const next = sortedByCost.find(r => !used.has(r.id) && runningCost + getRecipeCost(r) <= mealBudget);
+      if (next) {
+        newPlan[mealDays[i]] = next.id;
+        runningCost += getRecipeCost(next);
+      }
     }
 
     mealPlan = newPlan;
@@ -2773,7 +2785,7 @@ function renderGroceryList() {
   // Over budget warning
   const warningEl = document.getElementById('budgetWarning');
   if (warningEl) {
-    if (left < -30) {
+    if (left < 0) {
       const over = Math.abs(left);
       // Find most expensive non-staple items to suggest removing
       const suggestions = [...groceryItems]
@@ -2783,12 +2795,19 @@ function renderGroceryList() {
         .map(i => `${i.name} ($${(i.price*(i.qty||1)).toFixed(2)})`)
         .join(', ');
       warningEl.style.display = 'block';
-      warningEl.innerHTML = `⚠️ <strong style="color:#f87171;">Over budget by $${over.toFixed(2)}!</strong> Consider removing: <span style="color:#facc15;">${suggestions}</span>`;
-    } else if (left < 30) {
+      warningEl.innerHTML = `⚠️ <strong style="color:#f87171;">Over budget by $${over.toFixed(2)}!</strong>${suggestions ? ' Consider removing: <span style="color:#facc15;">' + suggestions + '</span>' : ''}`;
+      // Toast alert when going over (only fire once per threshold crossing)
+      if (!warningEl._wasOver) {
+        showToast(`🚨 Over budget by $${over.toFixed(2)}!`);
+        warningEl._wasOver = true;
+      }
+    } else if (left <= 30) {
       warningEl.style.display = 'block';
       warningEl.innerHTML = `🟡 <strong>Getting close to budget</strong> — only <strong>$${left.toFixed(2)}</strong> remaining.`;
+      warningEl._wasOver = false;
     } else {
       warningEl.style.display = 'none';
+      warningEl._wasOver = false;
     }
   }
 
@@ -3481,7 +3500,7 @@ function renderShoppingMode() {
 }
 
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, duration) {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
   clearTimeout(toastTimer);
@@ -3489,7 +3508,7 @@ function showToast(msg) {
   el.className = 'toast';
   el.textContent = msg;
   document.body.appendChild(el);
-  toastTimer = setTimeout(() => el.remove(), 2500);
+  toastTimer = setTimeout(() => el.remove(), duration || 3500);
 }
 </script>
 </body>
